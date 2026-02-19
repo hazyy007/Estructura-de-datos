@@ -235,22 +235,23 @@ Status music_setState(Music *m, const State state)
 
 int music_cmp(const void *m1, const void *m2)
 {
+  const Music *a;
+  const Music *b;
+  int title_cmp;
 
-  if(!m1 || !m2){
+  if (!m1 || !m2) {
     return 0;
   }
 
-  const Music *a = (const Music *)m1;
-  const Music *b = (const Music *)m2;
-  int title_cmp = strcmp(a->title, b->title);
+  a = (const Music *)m1;
+  b = (const Music *)m2;
 
-  if (a->id != b->id)
-  {
+  if (a->id != b->id) {
     return (a->id < b->id) ? -1 : 1;
   }
 
-  if (title_cmp != 0)
-  {
+  title_cmp = strcmp(a->title, b->title);
+  if (title_cmp != 0) {
     return title_cmp;
   }
 
