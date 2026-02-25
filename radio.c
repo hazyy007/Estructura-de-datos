@@ -280,7 +280,8 @@ Status radio_readFromFile(FILE *fin, Radio *r) {
         if (fgets(desc, sizeof(desc), fin) == NULL) break;
         desc[strcspn(desc, "\r\n")] = '\0';
         
-        if (desc[0] != '\0') { // Evitar líneas vacías
+        if (desc[0] != '\0') 
+        {
             radio_newMusic(r, desc);
         }
     }
