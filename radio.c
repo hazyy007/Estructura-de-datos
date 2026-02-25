@@ -54,32 +54,33 @@ void radio_free(Radio *r)
     }
 }
 
-Status radio_newMusic(Radio *r, char *desc)
-{
+Status radio_newMusic(Radio *r, char *desc) {
     Music *new_music = NULL;
     int i;
-    if (!r || !desc)
-    {
-        return ERROR;
-    }
+
+    if (!r || !desc) return ERROR;
+
     new_music = music_initFromString(desc);
-    for (i = 0; i < r->num_music; i++)
-    {
-        if (music_getId(new_music) == music_getId(r->songs[i]))
-        {
+    if (!new_music) return ERROR;
+
+    /* Comprobar si ya existe por ID */
+    for (i = 0; i < r->num_music; i++) {
+        if (music_getId(new_music) == music_getId(r->songs[i])) {
             music_free(new_music);
-            return OK;
+            return OK; /* Ya estaba, no es un error */
         }
     }
 
-    if (r->num_music >= MAX_MSC)
-    {
+    /* Verificar que hay espacio */
+    if (r->num_music >= MAX_MSC) {
         music_free(new_music);
         return ERROR;
     }
 
+    /* Insertar al final del contador actual */
     r->songs[r->num_music] = new_music;
-    r->num_music++;
+    r->num_music++; 
+
     return OK;
 }
 
@@ -261,55 +262,33 @@ int radio_print(FILE *pf, const Radio *r) {
     return i;
 }
 
-Status radio_readFromFile(FILE *fin, Radio *r)
-{
-    int i;
+Status radio_readFromFile(FILE *fin, Radio *r) {
+    int i, total_a_leer;
     char desc[1024];
     long id_orig, id_dest;
-    char c;
 
-    if (!fin || !r)
-    {
-        return ERROR;
-    }
+    if (!fin || !r) return ERROR;
 
-    /* 1. Leer el número de canciones */
-    if (fscanf(fin, "%d", &r->num_music) != 1)
-    {
-        return ERROR;
-    }
+    /* 1. Leer cuántas canciones vienen (sin tocar r->num_music directamente) */
+    if (fscanf(fin, "%d", &total_a_leer) != 1) return ERROR;
+    
+    /* LIMPIEZA: saltar el resto de la línea del número */
+    fgets(desc, sizeof(desc), fin); 
 
-    /* 2. Leer cada línea de descripción de canción */
-    for (i = 0; i < r->num_music; i++)
-    {
-        if (fgets(desc, sizeof(desc), fin) == NULL)
-            return ERROR;
-
-        /* Quitamos el salto de línea al final */
+    /* 2. Leer descripciones */
+    for (i = 0; i < total_a_leer; i++) {
+        if (fgets(desc, sizeof(desc), fin) == NULL) break;
         desc[strcspn(desc, "\r\n")] = '\0';
-
-        if (radio_newMusic(r, desc) == ERROR)
-            return ERROR;
+        
+        if (desc[0] != '\0') { // Evitar líneas vacías
+            radio_newMusic(r, desc);
+        }
     }
 
-    /* 3. Leer las relaciones */
-    /* Formato: ID_ORIGEN ID_DEST1 ID_DEST2 ... */
-    while (fscanf(fin, "%ld", &id_orig) == 1)
-    {
-        /* Mientras no lleguemos al final de la línea o del archivo */
-        while (fscanf(fin, "%ld", &id_dest) == 1)
-        {
-            radio_newRelation(r, id_orig, id_dest);
-
-            /* Miramos el siguiente carácter sin "gastarlo" */
-            c = fgetc(fin);
-            if (c == '\n' || c == '\r' || c == EOF)
-            {
-                break; /* Fin de la línea de relaciones */
-            }
-            /* Si no es salto de línea, lo devolvemos para que el siguiente fscanf funcione */
-            ungetc(c, fin);
-        }
+    /* 3. Leer relaciones */
+    /* fscanf es inteligente: se salta cualquier espacio o salto de línea */
+    while (fscanf(fin, "%ld %ld", &id_orig, &id_dest) == 2) {
+        radio_newRelation(r, id_orig, id_dest);
     }
 
     return OK;

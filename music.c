@@ -80,6 +80,7 @@ Music *music_initFromString(char *descr) {
 
   if (!descr) return NULL;
 
+  /* Creamos una copia para no destrozar el string original con strtok/punteros */
   buffer = (char*)malloc(strlen(descr) + 1);
   if (!buffer) return NULL;
   strcpy(buffer, descr);
@@ -92,35 +93,40 @@ Music *music_initFromString(char *descr) {
 
   p = buffer;
   while (*p) {
-    while (*p == ' ' || *p == '\t' || *p == '\n') p++; /* Salta blancos */
+    /* 1. Saltar espacios en blanco iniciales */
+    while (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r') p++; 
     if (!*p) break;
 
+    /* 2. Identificar la clave (ej: "id", "title") */
     key_start = p;
-    while (*p && *p != ':') p++; /* Busca el separador clave:valor */
+    while (*p && *p != ':') p++; 
     if (!*p) break;
-    *p++ = '\0'; /* Termina la clave */
+    *p++ = '\0'; /* Terminamos la clave con un nulo */
 
-    while (*p == ' ' || *p == '\t') p++; /* Salta blancos tras ':' */
+    /* 3. Saltar posibles espacios después de los ':' */
+    while (*p == ' ' || *p == '\t') p++; 
 
-    /* CORRECCIÓN: Manejo de comillas simples y dobles para títulos largos */
+    /* 4. Manejo de valores (con o sin comillas) */
     if (*p == '"' || *p == '\'') {
-      char quote = *p++;
-      value_start = p;
+      char quote = *p++; /* Guardamos si es " o ' */
+      value_start = p;   /* El valor empieza DESPUÉS de la comilla */
       while (*p && *p != quote) p++;
-      if (*p) *p++ = '\0';
+      if (*p) *p++ = '\0'; /* Quitamos la comilla de cierre y terminamos el string */
     } else {
+      /* Si no hay comillas, leemos hasta el siguiente espacio o fin */
       value_start = p;
-      while (*p && *p != ' ' && *p != '\t' && *p != '\n') p++;
+      while (*p && *p != ' ' && *p != '\t' && *p != '\n' && *p != '\r') p++;
       if (*p) *p++ = '\0';
     }
 
+    /* 5. Guardar el campo en la estructura Music */
+    /* Ahora value_start contiene "317" en vez de "\"317\"" */
     music_setField(m, key_start, value_start);
   }
 
   free(buffer);
   return m;
 }
-
 void music_free(void *m)
 {
   if (m)
