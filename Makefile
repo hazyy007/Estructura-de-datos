@@ -29,12 +29,12 @@ radio.o: radio.c
 
 p1_e2.o: p1_e2.c
 	$(CC) $(CFLAGS) -c p1_e2.c
+
 p1_e3.o: p1_e3.c
 	$(CC) $(CFLAGS) -c p1_e3.c
 
 clean:
 	rm -rf *.o $(EJS)
-
 
 run1:
 	@echo ">>>>>>Running p1_e1"
