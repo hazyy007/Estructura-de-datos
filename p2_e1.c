@@ -1,3 +1,5 @@
+#include "stack.h"
+#include "radio.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -31,6 +33,23 @@ int show_player_menu(Stack *history) {
 
 /* TODO MAIN FUNCTION */
 int main (int argc, char **argv) {
+
+    FILE *f;
+
+    /*Comprobacion de error*/
+    if(argc != 2){
+        fprintf(stderr, "Error");
+    }
+
+    /*1. Abrir el fichero*/
+    f = fopen(argv[1], "r");
+    if(!f){
+        fprintf(stdout, "Error al abrir el fichero");
+    }
+
+
+
+
 
 }
 
