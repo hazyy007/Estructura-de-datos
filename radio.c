@@ -269,10 +269,9 @@ Status radio_readFromFile(FILE *fin, Radio *r) {
 
     if (!fin || !r) return ERROR;
 
-    /* 1. Leer cuántas canciones vienen (sin tocar r->num_music directamente) */
+    /* 1. Leer cuántas canciones vienen */
     if (fscanf(fin, "%d", &total_a_leer) != 1) return ERROR;
     
-    /* LIMPIEZA: saltar el resto de la línea del número */
     fgets(desc, sizeof(desc), fin); 
 
     /* 2. Leer descripciones */
@@ -287,7 +286,6 @@ Status radio_readFromFile(FILE *fin, Radio *r) {
     }
 
     /* 3. Leer relaciones */
-    /* fscanf es inteligente: se salta cualquier espacio o salto de línea */
     while (fscanf(fin, "%ld %ld", &id_orig, &id_dest) == 2) {
         radio_newRelation(r, id_orig, id_dest);
     }

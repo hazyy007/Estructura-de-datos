@@ -92,27 +92,51 @@ Music *music_initFromString(char *descr) {
   }
 
   p = buffer;
-  while (*p) {
+  while (*p) 
+  {
     /* 1. Saltar espacios en blanco iniciales */
-    while (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r') p++; 
-    if (!*p) break;
-
-    /* 2. Identificar la clave (ej: "id", "title") */
+    while (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r') 
+    {
+      p++;
+    } 
+    if (!*p) 
+    {
+      break;
+    }
+    /* 2. Identificar la key */
     key_start = p;
-    while (*p && *p != ':') p++; 
-    if (!*p) break;
-    *p++ = '\0'; /* Terminamos la clave con un nulo */
+    while (*p && *p != ':') 
+    {
+      p++;
+    } 
+    if (!*p) 
+    {
+      break;
+    }
+    *p++ = '\0';
 
     /* 3. Saltar posibles espacios después de los ':' */
-    while (*p == ' ' || *p == '\t') p++; 
+    while (*p == ' ' || *p == '\t') 
+    {
+      p++; 
+    }
 
-    /* 4. Manejo de valores (con o sin comillas) */
-    if (*p == '"' || *p == '\'') {
-      char quote = *p++; /* Guardamos si es " o ' */
-      value_start = p;   /* El valor empieza DESPUÉS de la comilla */
-      while (*p && *p != quote) p++;
-      if (*p) *p++ = '\0'; /* Quitamos la comilla de cierre y terminamos el string */
-    } else {
+    /* 4. Manejo de valores */
+    if (*p == '"' || *p == '\'') 
+    {
+      char quote = *p++;
+      value_start = p; 
+      while (*p && *p != quote) 
+      {
+        p++;
+      }
+      if (*p) 
+      {
+        *p++ = '\0';
+      }
+    } 
+    else 
+    {
       /* Si no hay comillas, leemos hasta el siguiente espacio o fin */
       value_start = p;
       while (*p && *p != ' ' && *p != '\t' && *p != '\n' && *p != '\r') p++;
